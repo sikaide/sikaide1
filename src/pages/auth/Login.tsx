@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,8 @@ const Login: React.FC = () => {
   
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const { signIn } = useAuth();
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -20,11 +23,10 @@ const Login: React.FC = () => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
-    // Basic validation
     if (!formData.email || !formData.password) {
       setError('Email and password are required');
       return;
@@ -32,12 +34,14 @@ const Login: React.FC = () => {
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Login data:', formData);
+    try {
+      await signIn(formData.email, formData.password);
+      navigate('/marketplace');
+    } catch (err) {
+      setError('Invalid email or password');
+    } finally {
       setIsSubmitting(false);
-      // In a real app, we would redirect after successful login
-    }, 1500);
+    }
   };
   
   return (

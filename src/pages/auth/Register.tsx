@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ const Register: React.FC = () => {
   
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -24,11 +27,10 @@ const Register: React.FC = () => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
-    // Basic validation
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       setError('All fields are required');
       return;
@@ -46,12 +48,14 @@ const Register: React.FC = () => {
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Registration data:', formData);
+    try {
+      await signUp(formData.email, formData.password, formData.role);
+      navigate('/marketplace');
+    } catch (err) {
+      setError('Failed to create account. Please try again.');
+    } finally {
       setIsSubmitting(false);
-      // In a real app, we would redirect after successful registration
-    }, 1500);
+    }
   };
   
   return (
